@@ -1,5 +1,5 @@
 TableMappingElem struct
-	mnemonic dword ?
+	mnemonic byte 0, 0, 0, 0, 0, 0, 0, 0
 	address dword ?
 TableMappingElem ends
 
