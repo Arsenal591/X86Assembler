@@ -38,7 +38,7 @@ TableElem < 22h, reg_type, 08h, reg_or_mem_type, 08h, 0, 0 >
 TableElem < 23h, reg_type, 10h, reg_or_mem_type, 10h, 0, 0 >
 TableElem < 23h, reg_type, 20h, reg_or_mem_type, 20h, 0, 0 >
 
-ADD_table Table < 11, OFFSET AND_table_elems>
+AND_table Table < 11, OFFSET AND_table_elems>
 
 ; CALL instruction
 CALL_table_elems TableElem < 0E8h, offset_type, 10h, null_type, 00h, 0, 0 > 
