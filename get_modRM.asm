@@ -3,6 +3,8 @@
 
 include operand.inc
 
+public get_modeRM
+
 .code
 
 get_encoding_of_register PROC,
