@@ -1,5 +1,5 @@
 TableMappingElem struct
-	mnemonic byte 0, 0, 0, 0, 0, 0, 0, 0
+	mnemonic byte 8 DUP(0)
 	address dword ?
 TableMappingElem ends
 
@@ -22,3 +22,5 @@ Table struct
 	len dword ?
 	address dword ?
 Table ends
+
+EXTERNDEF table_mapping: TableMapping

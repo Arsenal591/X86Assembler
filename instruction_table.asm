@@ -4,8 +4,6 @@
 include operand.inc
 include instruction_table.inc
 
-public table_mapping, ADD_table_elems
-
 .data
 ; -------- tables begin here --------
 ; (the following code is just an example)
@@ -233,7 +231,28 @@ XOR_table Table < 11, OFFSET XOR_table_elems>
 
 ;------ table mapping begins here --------
 
-table_mapping_elems TableMappingElem <"XOR", offset XOR_table>
+table_mapping_elems TableMappingElem <"ADD", OFFSET ADD_table>
+TableMappingElem <"AND", OFFSET AND_table>
+TableMappingElem <"CALL", OFFSET CALL_table>
+TableMappingElem <"CMP", OFFSET CMP_table>
+TableMappingElem <"DEC", OFFSET DEC_table>
+TableMappingElem <"INC", OFFSET INC_table>
+TableMappingElem <"JMP", OFFSET JMP_table>
+TableMappingElem <"LEA", OFFSET LEA_table>
+TableMappingElem <"MOV", OFFSET MOV_table>
+TableMappingElem <"NEG", OFFSET NEG_table>
+TableMappingElem <"OR", OFFSET OR_table>
+TableMappingElem <"POP", OFFSET POP_table>
+TableMappingElem <"PUSH", OFFSET PUSH_table>
+TableMappingElem <"RET", OFFSET RET_table>
+TableMappingElem <"SAL", OFFSET SAL_table>
+TableMappingElem <"SAR", OFFSET SAR_table>
+TableMappingElem <"SHL", OFFSET SHL_table>
+TableMappingElem <"SHR", OFFSET SHR_table>
+TableMappingElem <"SUB", OFFSET SUB_table>
+TableMappingElem <"XCHG", OFFSET XCHG_table>
+TableMappingElem <"XOR", OFFSET XOR_table>
 
-table_mapping TableMapping <1, offset table_mapping_elems>
+table_mapping TableMapping <21, OFFSET table_mapping_elems>
+
 end
