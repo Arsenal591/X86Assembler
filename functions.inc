@@ -24,4 +24,5 @@ get_modeRM PROTO,
 translate_asm_to_machine_code PROTO,
 	mne_addr: PTR BYTE,	
 	op1_addr: PTR Operand,
-	op2_addr: PTR Operand
+	op2_addr: PTR Operand,
+	result_addr: PTR BYTE

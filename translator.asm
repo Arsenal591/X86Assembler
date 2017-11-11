@@ -12,7 +12,8 @@ includelib Irvine32.lib
 translate_asm_to_machine_code PROC,
 	mne_addr: PTR BYTE,			; the start address of a string, which is mnemonic
 	op1_addr: PTR Operand,		; the first operand, null_ptr if no operand
-	op2_addr: PTR Operand		; the second operand, null_ptr if no operand
+	op2_addr: PTR Operand,		; the second operand, null_ptr if no operand
+	result_addr: PTR BYTE		; the machine code string
 ;
 ; Generate machine code from asm languange
 ; Return: eax = bytes of the machine code
