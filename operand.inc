@@ -6,7 +6,7 @@ Operand STRUCT
 Operand ENDS
 
 ImmOperand struct
-	value dword ?
+	value sdword ?
 ImmOperand ends
 
 RegOperand struct
@@ -14,7 +14,7 @@ RegOperand struct
 RegOperand ends
 
 GlobalOperand struct
-	value dword ?
+	value sdword ?
 GlobalOperand ends
 
 LocalOperand struct
@@ -22,11 +22,11 @@ LocalOperand struct
 	index byte ?
 	scale byte ?
 	align dword
-	bias dword ?
+	bias sdword ?
 LocalOperand ends
 
 OffsetOperand struct
-	bias dword ?
+	bias sdword ?
 OffsetOperand ends
 
 ; register symbols
