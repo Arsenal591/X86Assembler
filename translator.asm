@@ -190,6 +190,9 @@ imm_string:	; Add immediate
 		inc esi
 		add result_length, 9
 	.ENDIF
+	
+	mov bl, 0
+	mov [esi], bl
 	mov eax, result_length
 	ret
 translate_asm_to_machine_code ENDP
