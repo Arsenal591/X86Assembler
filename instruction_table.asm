@@ -156,11 +156,11 @@ PUSH_table Table < 7, OFFSET PUSH_table_elems>
 
 ; RET instruction
 RET_table_elems TableElem <0C3h, null_type, 00h, null_type, 00h, 0, 0 >
-TableElem <0CBh, null_type, 00h, null_type, 00h, 0, 0 >
-TableElem <0C2h, imm_type, 10h, null_type, 00h, 0, 0 >
-TableElem <0CAh, imm_type, 10h, null_type, 00h, 0, 0 >
+;TableElem <0CBh, null_type, 00h, null_type, 00h, 0, 0 >
+;TableElem <0C2h, imm_type, 10h, null_type, 00h, 0, 0 >
+;TableElem <0CAh, imm_type, 10h, null_type, 00h, 0, 0 >
 
-RET_table Table < 4, OFFSET RET_table_elems>
+RET_table Table < 1, OFFSET RET_table_elems>
 
 ; SAL/SAR/SHL/SHR instruction
 SAL_table_elems TableElem <0C0h, reg_or_mem_type, 08h, imm_type, 08h, 0, 0 >

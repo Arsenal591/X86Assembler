@@ -7,6 +7,7 @@ include operand.inc
 include instruction_table.inc
 includelib Irvine32.lib
 
+.code
 ;--------------------------------------------------
 find_opcode PROC USES ebx ecx edx edi esi,
 	mne_addr: PTR BYTE,			; the start address of a string, which is mnemonic
@@ -17,6 +18,7 @@ find_opcode PROC USES ebx ecx edx edi esi,
 ;
 ; Get the Opcode by mnemonic and operands
 ; Return: al = Opcode
+;--------------------------------------------------
 	mov ecx, table_mapping.len
 	mov edi, table_mapping.address
 	INVOKE Str_ucase, mne_addr
@@ -33,30 +35,42 @@ L2: ; Find in table mapping
 	mov ecx, DWORD PTR [esi]
 	mov edi, DWORD PTR [esi + 4]
 L3:
-	mov esi, op1_addr
-	mov bl, (Operand PTR [esi]).op_type
 	mov dl, (TableElem PTR [edi]).target_type
-	.IF bl & dl
-		mov bl, (Operand PTR [esi]).op_size
-		mov dl, (TableElem PTR [edi]).target_size
-		.IF bl != dl
+	.IF op1_addr != 0
+		mov esi, op1_addr
+		mov bl, (Operand PTR [esi]).op_type
+		.IF bl & dl
+			mov bl, (Operand PTR [esi]).op_size
+			mov dl, (TableElem PTR [edi]).target_size
+			.IF bl != dl
+				jmp L4
+			.ENDIF
+		.ELSE
 			jmp L4
 		.ENDIF
 	.ELSE
-		jmp L4
+		.IF dl != null_type
+			jmp L4
+		.ENDIF
 	.ENDIF
-	
-	mov esi, op2_addr
-	mov bl, (Operand PTR [esi]).op_type
+
 	mov dl, (TableElem PTR [edi]).source_type
-	.IF bl & dl
-		mov bl, (Operand PTR [esi]).op_size
-		mov dl, (TableElem PTR [edi]).source_size
-		.IF bl != dl
+	.IF op2_addr != 0
+		mov esi, op2_addr
+		mov bl, (Operand PTR [esi]).op_type
+		.IF bl & dl
+			mov bl, (Operand PTR [esi]).op_size
+			mov dl, (TableElem PTR [edi]).source_size
+			.IF bl != dl
+				jmp L4
+			.ENDIF
+		.ELSE
 			jmp L4
 		.ENDIF
 	.ELSE
-		jmp L4
+		.IF dl != null_type
+			jmp L4
+		.ENDIF
 	.ENDIF
 	
 	jmp L5

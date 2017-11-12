@@ -2,6 +2,7 @@
 .MODEL flat, stdcall
 
 include operand.inc
+include functions.inc
 
 public get_modeRM
 
