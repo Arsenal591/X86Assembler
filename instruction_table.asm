@@ -114,18 +114,18 @@ MOV_table Table < 12, OFFSET MOV_table_elems>
 ; below this line is JYH's work(tables N - Z) -----------
 
 ; NEG instruction
-NEG_table_elems TableElem < 0F6h, reg_or_mem_type, 08h, null_type, 00h, 0, 0 >
-TableElem < 0F7h, reg_or_mem_type, 10h, null_type, 00h, 0, 0 >
-TableElem < 0F7h, reg_or_mem_type, 20h, null_type, 00h, 0, 0 >
+NEG_table_elems TableElem < 0F6h, reg_or_mem_type, 08h, null_type, 00h, 0, 3 >
+TableElem < 0F7h, reg_or_mem_type, 10h, null_type, 00h, 0, 3 >
+TableElem < 0F7h, reg_or_mem_type, 20h, null_type, 00h, 0, 3 >
 
 NEG_table Table < 3, OFFSET NEG_table_elems>
 
 ; OR instruction
-OR_table_elems TableElem <80h, reg_or_mem_type, 08h, imm_type, 08h, 0, 0 >
-TableElem <81h, reg_or_mem_type, 10h, imm_type, 10h, 0, 0 >
-TableElem <81h, reg_or_mem_type, 20h, imm_type, 20h, 0, 0 >
-TableElem <83h, reg_or_mem_type, 10h, imm_type, 08h, 0, 0 >
-TableElem <83h, reg_or_mem_type, 20h, imm_type, 08h, 0, 0 >
+OR_table_elems TableElem <80h, reg_or_mem_type, 08h, imm_type, 08h, 0, 1 >
+TableElem <81h, reg_or_mem_type, 10h, imm_type, 10h, 0, 1 >
+TableElem <81h, reg_or_mem_type, 20h, imm_type, 20h, 0, 1 >
+TableElem <83h, reg_or_mem_type, 10h, imm_type, 08h, 0, 1 >
+TableElem <83h, reg_or_mem_type, 20h, imm_type, 08h, 0, 1 >
 TableElem <08h, reg_or_mem_type, 08h, reg_type, 08h, 0, 0 >
 TableElem <09h, reg_or_mem_type, 10h, reg_type, 10h, 0, 0 >
 TableElem <09h, reg_or_mem_type, 20h, reg_type, 20h, 0, 0 >
@@ -144,8 +144,8 @@ TableElem <58h, reg_type, 20h, null_type, 00h, 1, 0 >
 POP_table Table < 4, OFFSET POP_table_elems>
 
 ; PUSH instruction
-PUSH_table_elems TableElem <0FFh, reg_or_mem_type, 10h, null_type, 00h, 0, 0 >
-TableElem <0FFh, reg_or_mem_type, 20h, null_type, 00h, 0, 0 >
+PUSH_table_elems TableElem <0FFh, reg_or_mem_type, 10h, null_type, 00h, 0, 6 >
+TableElem <0FFh, reg_or_mem_type, 20h, null_type, 00h, 0, 6 >
 TableElem <50h, reg_type, 10h, null_type, 00h, 1, 0 >
 TableElem <50h, reg_type, 20h, null_type, 00h, 1, 0 >
 TableElem <6Ah, imm_type, 08h, null_type, 00h, 0, 0 >
@@ -163,36 +163,36 @@ RET_table_elems TableElem <0C3h, null_type, 00h, null_type, 00h, 0, 0 >
 RET_table Table < 1, OFFSET RET_table_elems>
 
 ; SAL/SAR/SHL/SHR instruction
-SAL_table_elems TableElem <0C0h, reg_or_mem_type, 08h, imm_type, 08h, 0, 0 >
-TableElem <0C1h, reg_or_mem_type, 10h, imm_type, 08h, 0, 0 >
-TableElem <0C1h, reg_or_mem_type, 20h, imm_type, 08h, 0, 0 >
+SAL_table_elems TableElem <0C0h, reg_or_mem_type, 08h, imm_type, 08h, 0, 4 >
+TableElem <0C1h, reg_or_mem_type, 10h, imm_type, 08h, 0, 4 >
+TableElem <0C1h, reg_or_mem_type, 20h, imm_type, 08h, 0, 4 >
 
 SAL_table Table < 3, OFFSET SAL_table_elems>
 
-SAR_table_elems TableElem <0C0h, reg_or_mem_type, 08h, imm_type, 08h, 0, 0 >
-TableElem <0C1h, reg_or_mem_type, 10h, imm_type, 08h, 0, 0 >
-TableElem <0C1h, reg_or_mem_type, 20h, imm_type, 08h, 0, 0 >
+SAR_table_elems TableElem <0C0h, reg_or_mem_type, 08h, imm_type, 08h, 0, 7 >
+TableElem <0C1h, reg_or_mem_type, 10h, imm_type, 08h, 0, 7 >
+TableElem <0C1h, reg_or_mem_type, 20h, imm_type, 08h, 0, 7 >
 
 SAR_table Table < 3, OFFSET SAR_table_elems>
 
-SHL_table_elems TableElem <0C0h, reg_or_mem_type, 08h, imm_type, 08h, 0, 0 >
-TableElem <0C1h, reg_or_mem_type, 10h, imm_type, 08h, 0, 0 >
-TableElem <0C1h, reg_or_mem_type, 20h, imm_type, 08h, 0, 0 >
+SHL_table_elems TableElem <0C0h, reg_or_mem_type, 08h, imm_type, 08h, 0, 4 >
+TableElem <0C1h, reg_or_mem_type, 10h, imm_type, 08h, 0, 4 >
+TableElem <0C1h, reg_or_mem_type, 20h, imm_type, 08h, 0, 4 >
 
 SHL_table Table < 3, OFFSET SHL_table_elems>
 
-SHR_table_elems TableElem <0C0h, reg_or_mem_type, 08h, imm_type, 08h, 0, 0 >
-TableElem <0C1h, reg_or_mem_type, 10h, imm_type, 08h, 0, 0 >
-TableElem <0C1h, reg_or_mem_type, 20h, imm_type, 08h, 0, 0 >
+SHR_table_elems TableElem <0C0h, reg_or_mem_type, 08h, imm_type, 08h, 0, 5 >
+TableElem <0C1h, reg_or_mem_type, 10h, imm_type, 08h, 0, 5 >
+TableElem <0C1h, reg_or_mem_type, 20h, imm_type, 08h, 0, 5 >
 
 SHR_table Table < 3, OFFSET SHR_table_elems>
 
 ; SUB instruction
-SUB_table_elems TableElem <80h, reg_or_mem_type, 08h, imm_type, 08h, 0, 0 >
-TableElem <81h, reg_or_mem_type, 10h, imm_type, 10h, 0, 0 >
-TableElem <81h, reg_or_mem_type, 20h, imm_type, 20h, 0, 0 >
-TableElem <83h, reg_or_mem_type, 10h, imm_type, 08h, 0, 0 >
-TableElem <83h, reg_or_mem_type, 20h, imm_type, 08h, 0, 0 >
+SUB_table_elems TableElem <80h, reg_or_mem_type, 08h, imm_type, 08h, 0, 5 >
+TableElem <81h, reg_or_mem_type, 10h, imm_type, 10h, 0, 5 >
+TableElem <81h, reg_or_mem_type, 20h, imm_type, 20h, 0, 5 >
+TableElem <83h, reg_or_mem_type, 10h, imm_type, 08h, 0, 5 >
+TableElem <83h, reg_or_mem_type, 20h, imm_type, 08h, 0, 5 >
 TableElem <28h, reg_or_mem_type, 08h, reg_type, 08h, 0, 0 >
 TableElem <29h, reg_or_mem_type, 10h, reg_type, 10h, 0, 0 >
 TableElem <29h, reg_or_mem_type, 20h, reg_type, 20h, 0, 0 >
@@ -213,11 +213,11 @@ TableElem <87h, reg_type, 20h, reg_or_mem_type, 20h, 0, 0 >
 XCHG_table Table < 6, OFFSET XCHG_table_elems>
 
 ; XOR instruction
-XOR_table_elems TableElem <80h, reg_or_mem_type, 08h, imm_type, 08h, 0, 0 >
-TableElem <81h, reg_or_mem_type, 10h, imm_type, 10h, 0, 0 >
-TableElem <81h, reg_or_mem_type, 20h, imm_type, 20h, 0, 0 >
-TableElem <83h, reg_or_mem_type, 10h, imm_type, 08h, 0, 0 >
-TableElem <83h, reg_or_mem_type, 20h, imm_type, 08h, 0, 0 >
+XOR_table_elems TableElem <80h, reg_or_mem_type, 08h, imm_type, 08h, 0, 6 >
+TableElem <81h, reg_or_mem_type, 10h, imm_type, 10h, 0, 6 >
+TableElem <81h, reg_or_mem_type, 20h, imm_type, 20h, 0, 6 >
+TableElem <83h, reg_or_mem_type, 10h, imm_type, 08h, 0, 6 >
+TableElem <83h, reg_or_mem_type, 20h, imm_type, 08h, 0, 6 >
 TableElem <30h, reg_or_mem_type, 08h, reg_type, 08h, 0, 0 >
 TableElem <31h, reg_or_mem_type, 10h, reg_type, 10h, 0, 0 >
 TableElem <31h, reg_or_mem_type, 20h, reg_type, 20h, 0, 0 >

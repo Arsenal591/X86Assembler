@@ -82,9 +82,18 @@ L4:
 	ret
 L5: ; Find in table
 	mov al, (TableElem PTR [edi]).opcode
+	
 	mov bl, (TableElem PTR [edi]).encoded
 	mov esi, encoded_addr
 	mov BYTE PTR [esi], bl
+	
+	push edi
+	.IF bl == 1
+		mov edi, (Operand PTR [esi]).address
+		add al, (RegOperand PTR [edi]).reg
+	.ENDIF
+	pop edi
+
 	mov bl, (TableElem PTR [edi]).digit
 	mov esi, digit_addr
 	mov BYTE PTR [esi], bl
