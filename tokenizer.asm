@@ -21,14 +21,15 @@ Str_clear PROC USES ecx edi,
 
 Str_clear ENDP
 
-Str_write_at PROC USES edx,
+Str_write_at PROC USES eax edx,
 	target: DWORD,
 	index: DWORD,
 	value: BYTE
 
 	mov edx, target
 	add edx, index
-	mov BYTE PTR[edx], value
+	mov al, value
+	mov BYTE PTR[edx], al
 
 	ret
 
