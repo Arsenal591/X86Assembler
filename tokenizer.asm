@@ -2,6 +2,46 @@
 .MODEL flat, stdcall
 
 include tokenizer.inc
+include operand.inc
+include parser_varible.inc
+include functions.inc
+
+Str_copy proto,
+	source: PTR BYTE,
+	target: PTR BYTE
+
+Str_compare proto,
+	string1: PTR BYTE,
+	string2: PTR BYTE
+
+WriteString proto
+WriteChar proto
+WriteInt proto
+
+reg_string_mappings RegStringMappingElem <"EAX", full_reg SHL 4 + EAX_num>
+RegStringMappingElem <"EBX", full_reg SHL 4 + EBX_num>
+RegStringMappingElem <"ECX", full_reg SHL 4 + ECX_num>
+RegStringMappingElem <"EDX", full_reg SHL 4 + EDX_num>
+RegStringMappingElem <"ESI", full_reg SHL 4 + ESI_num>
+RegStringMappingElem <"EDI", full_reg SHL 4 + EDI_num>
+RegStringMappingElem <"ESP", full_reg SHL 4 + ESP_num>
+RegStringMappingElem <"EBP", full_reg SHL 4 + EBP_num>
+RegStringMappingElem <"AX", half_reg SHL 4 + EAX_num>
+RegStringMappingElem <"BX", half_reg SHL 4 + EBX_num>
+RegStringMappingElem <"CX", half_reg SHL 4 + ECX_num>
+RegStringMappingElem <"DX", half_reg SHL 4 + EDX_num>
+RegStringMappingElem <"SI", half_reg SHL 4 + ESI_num>
+RegStringMappingElem <"DI", half_reg SHL 4 + EDI_num>
+RegStringMappingElem <"SP", half_reg SHL 4 + ESP_num>
+RegStringMappingElem <"BP", half_reg SHL 4 + EBP_num>
+RegStringMappingElem <"AL", low_quar_reg SHL 4 + EAX_num>
+RegStringMappingElem <"BL", low_quar_reg SHL 4 + EBX_num>
+RegStringMappingElem <"CL", low_quar_reg SHL 4 + ECX_num>
+RegStringMappingElem <"DL", low_quar_reg SHL 4 + EDX_num>
+RegStringMappingElem <"AH", high_quar_reg SHL 4 + EAX_num>
+RegStringMappingElem <"BH", high_quar_reg SHL 4 + EBX_num>
+RegStringMappingElem <"CH", high_quar_reg SHL 4 + ECX_num>
+RegStringMappingElem <"DD", high_quar_reg SHL 4 + EDX_num>
 
 .code
 
