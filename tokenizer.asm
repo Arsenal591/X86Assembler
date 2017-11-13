@@ -50,7 +50,7 @@ Str_clear PROC USES ecx edi,
 	max_length: DWORD
 
 	mov ecx, 0
-	lea edi, target
+	mov edi, target
 
 	.while ecx < max_length
 		mov BYTE PTR[edi], 0
@@ -84,7 +84,7 @@ process_code_label PROC USES ebx edx esi,
 	lea edx, code_symbol_list
 	invoke find_symbol, edx, pString
 	.if ebx == 0
-		mov eax, -1
+		mov eax, 1
 		ret
 	.else
 		mov esi, pOperand
@@ -115,7 +115,7 @@ process_data_label PROC,
 	lea edx, data_symbol_list
 	invoke find_symbol, edx, pString
 	.if ebx == 0
-		mov eax, -1
+		mov eax, 1
 		ret
 	.else
 		mov esi, pOperand
@@ -143,7 +143,7 @@ process_proc_label PROC USES ebx edx esi,
 	lea edx, proc_symbol_list
 	invoke find_symbol, edx, pString
 	.if ebx == 0
-		mov eax, -1
+		mov eax, 1
 		ret
 	.else
 		mov esi, pOperand
