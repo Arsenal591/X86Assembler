@@ -18,6 +18,9 @@ WriteString proto
 WriteChar proto
 WriteInt proto
 
+.data
+divide_str BYTE "--------------", 13, 10, 0
+
 reg_string_mappings RegStringMappingElem <"EAX", full_reg SHL 4 + EAX_num>
 RegStringMappingElem <"EBX", full_reg SHL 4 + EBX_num>
 RegStringMappingElem <"ECX", full_reg SHL 4 + ECX_num>
@@ -250,119 +253,270 @@ insert_proc_label PROC USES ebx,
 	.endif
 	ret
 insert_proc_label ENDP
+
+
+tokenize_instruction PROC USES eax ecx edx esi edi,
+	code: DWORD,
+	max_length: DWORD,
+	initial_address: DWORD,
+	pCharProcessed: DWORD,
+	pFinalAddress: DWORD
+	LOCAL char: BYTE, status: BYTE, \
+	      tmp_str[256]: BYTE, tmp_str_len: DWORD, \
+		  instruct_str[256]: BYTE, \
+		  nOperands: BYTE, \
+		  operands[2]: Operand, real_operands[2]: LocalOperand, \
+		  char_processed: DWORD
+		  
+	mov nOperands, 0
 	mov status, BEGIN_STATE
-	invoke Str_clear, tmp_str, 256
+	mov char_processed, 0
 	mov tmp_str_len, 0
+	
+	lea esi, tmp_str
+	invoke Str_clear, esi, 256
+	lea esi, instruct_str
+	invoke Str_clear, esi, 256
 
 	mov ecx, 0
-	lea esi, code
-	.while ecx < max_length
-		mov char, BYTE PTR[esi]
-		push esi
+	mov esi, code
+	.while ecx <= max_length
+		mov al, BYTE PTR[esi]
+		mov char, al
+		inc char_processed
 
+		push esi
+		lea esi, tmp_str
+
+		; dumps debug info
+		push eax
+		push edx
+		mov edx, offset divide_str
+		call WriteString
+		movzx eax, status
+		call WriteInt
+		mov al, 13
+		call WriteChar
+		mov al, 10
+		call WriteChar
+		
+		mov al, char
+		call WriteChar
+		mov al, 13
+		call WriteChar
+		mov al, 10
+		call WriteChar	
+
+		lea edx, tmp_str
+		call WriteString
+		mov al, 13
+		call WriteChar
+		mov al, 10
+		call WriteChar
+		mov al, 13
+		call WriteChar
+		mov al, 10
+		call WriteChar
+		
+		pop edx
+		pop eax
+
+		; ends debug info
 		.if status == BEGIN_STATE
-			if (char >= 'a' && char <= 'z')  || (char >= 'A' && char <= 'Z')
-				status = FIRST_SYMBOL_STATE
-				; add char to symbol string
-				lea esi, tmp_str
-				invoke Str_write_at, esi, tmp_str_len
-				inc tmp_str_len
+			.if (char >= 'a' && char <= 'z')  || (char >= 'A' && char <= 'Z')
+				mov status, FIRST_SYMBOL_STATE
+				jmp increase_tmp_str	
+
 			.elseif char == 13 || char == 10
-				.continue
+				jmp final
+			.elseif char == 0
+				ret
 			; else ERRORs
 			.endif
 		.elseif status == FIRST_SYMBOL_STATE
-			if (char >= 'a' && char <= 'z')  || (char >= 'A' && char <= 'Z') \
+			.if (char >= 'a' && char <= 'z')  || (char >= 'A' && char <= 'Z') \
 			    || (char >= '0' && char <= '9')
-				; add char to symbol string
-				lea esi, tmp_str
-				invoke Str_write_at, esi, tmp_str_len
-				inc tmp_str_len
+				jmp increase_tmp_str
+
 			.elseif char == ':'
 				mov status, AFTER_CODE_LABEL_STATE
-				; deal with code label
+				jmp add_new_code_label
 			.elseif char == ' '
 				mov status, AFTER_FIRST_SYMBOL_STATE
-			.elseif char == 13 || char == 10
-				; deal with insturction label without operands
+			.elseif char == 13 || char == 10 || char == 0
+				mov status, BEGIN_STATE
+				lea edi, instruct_str
+				invoke Str_copy, esi, edi
+				jmp form_instruction
+
 			; else ERRORs
 			.endif
 		.elseif status == AFTER_FIRST_SYMBOL_STATE
 			.if (char >= 'a' && char <= 'z')  || (char >= 'A' && char <= 'Z')
-				; store symbol string as instruction
-				; restore symbol string
+				mov status, SYMBOL_STATE
+				lea edi, instruct_str
+				invoke Str_copy, esi, edi
+				jmp clear_tmp_str
+
 			.elseif char >= '0' && char <= '9'
-				; store symbol string as instruction
-				; restore symbol string
+				mov status, DIGIT_STATE
+				lea edi, instruct_str
+				invoke Str_copy, esi, edi
+				jmp clear_tmp_str
+
 			.elseif char == '['
-				; store symbol string as instrction
-				; restore symbol string
+				mov status, LOCAL_STATE
+				lea edi, instruct_str
+				invoke Str_copy, esi, edi
+				jmp clear_tmp_str
+
 			.elseif char == ':'
-				; deal with code label
+				mov status, AFTER_CODE_LABEL_STATE
+				jmp add_new_code_label
+
 			.elseif char == ' '
 				; do nothing
-			.elseif char == 13 || char == 10
-				; deal with insturction label without operands
+			.elseif char == 13 || char == 10 || char == 0
+				mov status, BEGIN_STATE
+				lea edi, instruct_str
+				invoke Str_copy, esi, edi
+				jmp form_instruction
+
 			; else ERRORs
 			.endif
 		.elseif status == AFTER_CODE_LABEL_STATE
-			.if char == ' ' || char == 13 || char == 10
+			.if char == ' ' || char == 13 || char == 10 || char == 0
 				mov status, BEGIN_STATE
+				jmp clear_tmp_str
 			; else ERRORS
 			.endif
 		.elseif status == AFTER_OPERAND_STATE
 			.if (char >= 'a' && char <= 'z')  || (char >= 'A' && char <= 'Z')
-				; store symbol string as instruction
-				; restore symbol string
+				mov status, SYMBOL_STATE
+				jmp increase_tmp_str
+
 			.elseif char >= '0' && char <= '9'
-				; store symbol string as instruction
-				; restore symbol string
+				mov status, DIGIT_STATE
+				jmp increase_tmp_str
+
 			.elseif char == '['
-				; store symbol string as instrction
-				; restore symbol string
+				mov status, LOCAL_STATE
+
 			.elseif char == ' '
 				; do nothing
-			.elseif char == 13 || char == 10
-				; deal with insturction label without operands
+			.elseif char == 13 || char == 10 || char == 0
+				mov status, BEGIN_STATE
+				jmp form_instruction
 			; else ERRORs
 			.endif
 		.elseif status == DIGIT_STATE
 			.if char >= '0' && char <= '9'
+				jmp increase_tmp_str
 
 			.elseif char == ' '
+				mov status, AFTER_OPERAND_STATE
+				jmp deal_with_digit
 
-			.elseif char == 13 || char == 10
-
+			.elseif char == 13 || char == 10  || char == 0
+				mov status, BEGIN_STATE
+				; deal with digit
+				jmp deal_with_digit
 			;else ERRORs
 			.endif
 
 		.elseif status == LOCAL_STATE
 			.if char == ']'
+				mov status, AFTER_OPERAND_STATE
+				jmp deal_with_local
 
-			.elseif char == 13 || char == 10
+			.elseif char == 13 || char == 10 || char == 0
 				; errors
 
 			.else
-
+				jmp increase_tmp_str
 			.endif
 
 		.elseif status == SYMBOL_STATE
-			if (char >= 'a' && char <= 'z')  || (char >= 'A' && char <= 'Z') \
+			.if (char >= 'a' && char <= 'z')  || (char >= 'A' && char <= 'Z') \
 			    || (char >= '0' && char <= '9')
-
+				jmp increase_tmp_str
 			.elseif char == ' '
+				mov status, AFTER_OPERAND_STATE
+				jmp deal_with_symbol
 
-			.elseif char == 13 || char == 10
+			.elseif char == 13 || char == 10 || char == 0
+				mov status, BEGIN_STATE
+				jmp deal_with_symbol
+			.endif
 
 			; else ERRORs
 		.endif
+		jmp final
 
+		increase_tmp_str:
+			invoke Str_write_at, esi, tmp_str_len, char
+			inc tmp_str_len
+			jmp final
 
+		clear_tmp_str:
+			mov tmp_str_len, 0
+			invoke Str_clear, esi, 256
+			.if (char >= 'a' && char <= 'z')  || (char >= 'A' && char <= 'Z') \
+			   || (char >= '0' && char <= '9')
+				jmp increase_tmp_str
+			.else
+				jmp final
+			.endif
+		
+		add_new_code_label:
+			invoke insert_code_label, esi, initial_address
+			.if eax != 0
+				;ERROR
+			.else
+				;nothing
+			.endif
+			jmp final
+
+		deal_with_symbol:
+			.if nOperands == 2
+				;ERROR
+			.else
+				inc nOperands
+
+			.endif
+
+			.if char == 13 || char == 10
+				jmp form_instruction
+			.else
+				jmp clear_tmp_str
+			.endif
+
+		deal_with_digit:
+			.if char == 13 || char == 10
+				jmp form_instruction
+			.else
+				jmp clear_tmp_str
+			.endif
+
+		deal_with_local:
+			.if char == 13 || char == 10
+				jmp form_instruction
+			.else
+				jmp clear_tmp_str
+			.endif
+
+		form_instruction:
+			.if char == 0
+				ret
+			.else
+				jmp clear_tmp_str
+			.endif
+		
+		final:
 		pop esi
 		inc ecx
 		inc esi
 	.endw
-
 	ret
 
 
