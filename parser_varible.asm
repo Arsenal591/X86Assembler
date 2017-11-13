@@ -30,7 +30,7 @@ push_list proc USES ebx ecx edx esi edi,
 	list: dword,
 	symbol: dword,
 	address: dword,
-	op_size: dword
+	op_size: byte
 	LOCAL len: dword
 
 	mov edx, list
@@ -59,8 +59,8 @@ push_list proc USES ebx ecx edx esi edi,
 	mov (SymbolElem ptr[ebx]).address, eax
 
 	; copy size
-	mov eax, op_size
-	mov (SymbolElem ptr[ebx]).op_size, eax
+	mov al, op_size
+	mov (SymbolElem ptr[ebx]).op_size, al
 
 	mov eax, 0
 	ret

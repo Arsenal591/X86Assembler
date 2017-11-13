@@ -1,6 +1,6 @@
 SymbolElem STRUCT
 	symbol BYTE 256 DUP(0)
-	op_size DWORD ?
+	op_size BYTE ?
 	address DWORD ?
 SymbolElem ENDS
 
@@ -17,7 +17,7 @@ push_list proto,
 	list: dword,
 	symbol: dword,
 	address: dword,
-	op_size: dword
+	op_size: byte
 
 find_symbol proto,
 	list: DWORD,
