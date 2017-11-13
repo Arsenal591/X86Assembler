@@ -95,6 +95,37 @@ process_data_label PROC,
 
 process_data_label ENDP
 
+process_proc_label PROC USES ebx edx esi,
+	pString: DWORD,
+	pOperand: DWORD,
+	current_address: DWORD
+
+	lea edx, proc_symbol_list
+	invoke find_symbol, edx, pString
+	.if ebx == 0
+		mov eax, -1
+		ret
+	.else
+		mov esi, pOperand
+		mov (Operand ptr[esi]).op_type, offset_type
+
+		mov eax, (SymbolElem ptr[ebx]).address
+		sub eax, current_address
+		.if eax <= 127 || eax >= (1 SHL 32 - 128)
+			mov (Operand ptr[esi]).op_size, 8
+		.else
+			mov (Operand ptr[esi]).op_size, 32
+		.endif
+
+		mov esi, (Operand ptr[esi]).address
+		mov (OffsetOperand ptr[esi]).bias, eax
+
+		mov eax, 0
+	.endif
+	ret
+
+process_proc_label ENDP
+
 	code: DWORD,
 	max_length: DWORD
 	LOCAL char: BYTE, status: BYTE, tmp_str[256]: BYTE, tmp_str_len: DWORD
