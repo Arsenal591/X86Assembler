@@ -4,8 +4,6 @@
 include parser_varible.inc
 include Irvine32.inc
 
-public proc_symbol_list, code_symbol_list, data_symbol_list
-
 Str_copy proto,
 	source: ptr byte,
 	target: ptr byte
