@@ -76,8 +76,8 @@ translate_asm_to_machine_code PROC USES ebx ecx edi esi,
 ;--------------------------------------------------
 	LOCAL digit: BYTE, encoded: BYTE, 
 		  mode_RM: BYTE, opcode: BYTE,
-		  flag_displace: BYTE, displacement: DWORD, 
-		  flag_immediate: BYTE, immediate: DWORD,
+		  flag_displace: BYTE, displacement: SDWORD, 
+		  flag_immediate: BYTE, immediate: SDWORD,
 		  result_length: DWORD
 
 	INVOKE find_opcode, mne_addr, op1_addr, op2_addr, ADDR digit, ADDR encoded
@@ -162,21 +162,37 @@ generate_string:
 		add result_length, 3
 	.ENDIF
 	; Add displacement
-	.IF flag_displace
-		INVOKE convert_dword_to_string, displacement, esi
-		add esi, 8
-		INVOKE append_space_to_string, esi
-		inc esi
-		add result_length, 9
+	.IF flag_displace == 1
+		.IF (displacement >= -128) && (displacement <= 127)
+			mov ebx, displacement
+			and ebx, 000000FFh
+			INVOKE convert_byte_to_string, bl, esi
+			add esi, 2
+			INVOKE append_space_to_string, esi
+			inc esi
+			add result_length, 3
+			jmp imm_string
+		.ELSE
+			INVOKE convert_dword_to_string, displacement, esi
+			add esi, 8
+			INVOKE append_space_to_string, esi
+			inc esi
+			add result_length, 9
+			jmp imm_string
+		.ENDIF
 	.ENDIF
-	; Add immediate
-	.IF flag_immediate
+
+imm_string:	; Add immediate
+	.IF flag_immediate == 1
 		INVOKE convert_dword_to_string, immediate, esi
 		add esi, 8
 		INVOKE append_space_to_string, esi
 		inc esi
 		add result_length, 9
 	.ENDIF
+	
+	mov bl, 0
+	mov [esi], bl
 	mov eax, result_length
 	ret
 translate_asm_to_machine_code ENDP

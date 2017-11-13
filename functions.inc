@@ -26,3 +26,7 @@ translate_asm_to_machine_code PROTO,
 	op1_addr: PTR Operand,
 	op2_addr: PTR Operand,
 	result_addr: PTR BYTE
+
+parse_local_operand PROTO,
+	str_addr: PTR BYTE,
+	local_op: PTR LocalOperand

@@ -89,6 +89,7 @@ L5: ; Find in table
 	
 	push edi
 	.IF bl == 1
+		mov esi, op1_addr
 		mov edi, (Operand PTR [esi]).address
 		add al, (RegOperand PTR [edi]).reg
 	.ENDIF
