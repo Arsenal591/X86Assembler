@@ -218,6 +218,38 @@ convert_symbol_to_operand PROC USES ecx edx esi,
 	ret
 
 convert_symbol_to_operand ENDP
+
+insert_code_label PROC USES ebx,
+	pString: DWORD,
+	address: DWORD
+
+	invoke find_symbol, offset code_symbol_list, pString
+	.if ebx != 0
+		mov eax, 1
+		ret
+	.else
+		invoke push_list, offset code_symbol_list, pString, address, 0
+		mov eax, 0
+		ret
+	.endif
+	ret
+insert_code_label ENDP
+
+insert_proc_label PROC USES ebx,
+	pString: DWORD,
+	address: DWORD
+
+	invoke find_symbol, offset proc_symbol_list, pString
+	.if ebx != 0
+		mov eax, 1
+		ret
+	.else
+		invoke push_list, offset proc_symbol_list, pString, address, 0
+		mov eax, 0
+		ret
+	.endif
+	ret
+insert_proc_label ENDP
 	mov status, BEGIN_STATE
 	invoke Str_clear, tmp_str, 256
 	mov tmp_str_len, 0
