@@ -166,10 +166,58 @@ process_proc_label PROC USES ebx edx esi,
 
 process_proc_label ENDP
 
-	code: DWORD,
-	max_length: DWORD
-	LOCAL char: BYTE, status: BYTE, tmp_str[256]: BYTE, tmp_str_len: DWORD
+convert_symbol_to_operand PROC USES ecx edx esi,
+	pString: DWORD,
+	pOperand: DWORD,
+	current_address: DWORD
 
+	; check if it is register
+	mov ecx, 0
+	mov edx, offset reg_string_mappings
+	.while ecx < 24
+		lea esi, (RegStringMappingElem ptr[edx]).str1
+		invoke Str_compare, pString, esi
+		je L1
+		inc ecx
+		add edx, sizeof RegStringMappingElem
+		.continue
+		L1:
+		.break
+	.endw
+
+	.if ecx < 24
+		mov esi, pOperand
+		mov (Operand ptr[esi]).op_type, reg_type
+		.if ecx < 8
+			mov (Operand ptr[esi]).op_size, 32
+		.elseif ecx < 16
+			mov (Operand ptr[esi]).op_size, 16
+		.else
+			mov (Operand ptr[esi]).op_size, 8
+		.endif
+		mov esi, (Operand ptr[esi]).address
+		
+		mov al, (RegStringMappingElem ptr[edx]).reg_num
+		mov (RegOperand ptr[esi]).reg, al
+
+		mov eax, 0
+		ret
+	.endif
+
+	invoke process_data_label, pString, pOperand
+	.if eax == 0
+		ret
+	.endif
+
+	invoke process_code_label, pString, pOperand, current_address
+	.if eax == 0
+		ret
+	.endif 
+
+	invoke process_proc_label, pString, pOperand, current_address
+	ret
+
+convert_symbol_to_operand ENDP
 	mov status, BEGIN_STATE
 	invoke Str_clear, tmp_str, 256
 	mov tmp_str_len, 0
