@@ -18,20 +18,21 @@ Str_compare proto,
 	string2: ptr byte
 
 .data
-proc_symbols SymbolElem 256 DUP(<256 DUP(0), 0>)
+proc_symbols SymbolElem 256 DUP(<256 DUP(0), 0, 0 >)
 proc_symbol_list SymbolList <0, offset proc_symbols>
 
-code_symbols SymbolElem 256 DUP(<256 DUP(0), 0>)
+code_symbols SymbolElem 256 DUP(<256 DUP(0), 0, 0 >)
 code_symbol_list SymbolList <0, offset code_symbols>
 
-data_symbols SymbolElem 256 DUP(<256 DUP(0), 0>)
+data_symbols SymbolElem 256 DUP(<256 DUP(0), 0, 0 >)
 data_symbol_list SymbolList <0, offset data_symbols>
 
 .code
 push_list proc USES ebx ecx edx esi edi,
 	list: dword,
 	symbol: dword,
-	address: dword
+	address: dword,
+	op_size: dword
 	LOCAL len: dword
 
 	mov edx, list
@@ -59,12 +60,17 @@ push_list proc USES ebx ecx edx esi edi,
 	mov eax, address
 	mov (SymbolElem ptr[ebx]).address, eax
 
+	; copy size
+	mov eax, op_size
+	mov (SymbolElem ptr[ebx]).op_size, eax
+
 	mov eax, 0
 	ret
 push_list endp
 
-; return address(>=0) when found, -1 otherwise
-find_symbol_address proc USES ebx ecx edx esi,
+; return SymbolElem address(>0) when found, 0 otherwise
+; return value is stored in EBX
+find_symbol proc USES eax ecx edx esi,
 	list: DWORD,
 	symbol: DWORD
 	LOCAL len: dword
@@ -86,12 +92,11 @@ find_symbol_address proc USES ebx ecx edx esi,
 		.continue
 
 		L1:
-		mov eax, (SymbolElem ptr[ebx]).address
 		ret
 	.endw
 
-	mov eax, -1
+	mov ebx, 0
 	ret
-find_symbol_address endp
+find_symbol endp
 
 end
