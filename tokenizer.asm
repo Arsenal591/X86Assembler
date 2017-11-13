@@ -281,7 +281,8 @@ insert_proc_label PROC USES ebx,
 	ret
 insert_proc_label ENDP
 
-
+; todo: error handling
+; todo: return pCharProcessed & pFinalAddress
 tokenize_instruction PROC USES eax ecx edx esi edi,
 	code: DWORD,
 	max_length: DWORD,
@@ -299,6 +300,11 @@ tokenize_instruction PROC USES eax ecx edx esi edi,
 	mov status, BEGIN_STATE
 	mov char_processed, 0
 	mov tmp_str_len, 0
+
+	lea esi, real_operands[0]
+	mov operands[0].address, esi
+	lea esi, real_operands[sizeof LocalOperand]
+	mov operands[sizeof Operand].address, esi
 	
 	lea esi, tmp_str
 	invoke Str_clear, esi, 256
@@ -357,7 +363,7 @@ tokenize_instruction PROC USES eax ecx edx esi edi,
 			.elseif char == 13 || char == 10
 				jmp final
 			.elseif char == 0
-				ret
+				jmp break_loop
 			; else ERRORs
 			.endif
 		.elseif status == FIRST_SYMBOL_STATE
@@ -385,7 +391,7 @@ tokenize_instruction PROC USES eax ecx edx esi edi,
 				invoke Str_copy, esi, edi
 				jmp clear_tmp_str
 
-			.elseif char >= '0' && char <= '9'
+			.elseif (char >= '0' && char <= '9') || char == '-' || char == '+'
 				mov status, DIGIT_STATE
 				lea edi, instruct_str
 				invoke Str_copy, esi, edi
@@ -422,7 +428,7 @@ tokenize_instruction PROC USES eax ecx edx esi edi,
 				mov status, SYMBOL_STATE
 				jmp increase_tmp_str
 
-			.elseif char >= '0' && char <= '9'
+			.elseif (char >= '0' && char <= '9') || char == '-' || char == '+'
 				mov status, DIGIT_STATE
 				jmp increase_tmp_str
 
