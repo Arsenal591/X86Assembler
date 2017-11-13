@@ -40,7 +40,6 @@ process_code_label PROC USES ebx edx esi,
 	pString: DWORD,
 	pOperand: DWORD,
 	current_address: DWORD
-	LOCAL pSymbolElem: DWORD, address_diff: SDWORD
 
 	lea edx, code_symbol_list
 	invoke find_symbol, edx, pString
@@ -71,14 +70,14 @@ process_code_label ENDP
 ; return value in EAX
 process_data_label PROC,
 	pString: DWORD,
-	pOperand: DWORD,
+	pOperand: DWORD
 
 	lea edx, data_symbol_list
 	invoke find_symbol, edx, pString
 	.if ebx == 0
 		mov eax, -1
 		ret
-	.elseif
+	.else
 		mov esi, pOperand
 		mov (Operand ptr[esi]).op_type, global_type
 
@@ -91,7 +90,8 @@ process_data_label PROC,
 
 		mov eax, 0
 		ret
-	.endif 
+	.endif
+	ret
 
 process_data_label ENDP
 
