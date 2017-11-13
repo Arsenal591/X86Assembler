@@ -6,3 +6,8 @@ AFTER_OPERAND_STATE = 3
 DIGIT_STATE = 4
 LOCAL_STATE = 5
 SYMBOL_STATE = 6
+
+RegStringMappingElem STRUCT
+	str1 BYTE 4 DUP(0)
+	reg_num BYTE ?
+RegStringMappingElem ENDS
