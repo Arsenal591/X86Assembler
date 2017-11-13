@@ -14,6 +14,8 @@ Str_compare proto,
 	string1: PTR BYTE,
 	string2: PTR BYTE
 
+ParseInteger32 PROTO
+
 WriteString proto
 WriteChar proto
 WriteInt proto
@@ -221,6 +223,31 @@ convert_symbol_to_operand PROC USES ecx edx esi,
 	ret
 
 convert_symbol_to_operand ENDP
+
+convert_digit_to_operand PROC USES eax ecx edx,
+	pString: DWORD,
+	str_len: DWORD,
+	pOperand: DWORD
+
+	mov ecx, str_len
+	mov edx, pString
+	invoke ParseInteger32
+
+	mov edx, pOperand
+	mov (Operand ptr[edx]).op_type, imm_type
+	.if eax < 128 || eax >= (1 SHL 32 - 128)
+		mov (Operand ptr[edx]).op_size, 8
+	.elseif eax <= 32767 || eax >= (1 SHL 32 - 32768)
+		mov (Operand ptr[edx]).op_size, 16
+	.else
+		mov (Operand ptr[edx]).op_size, 32
+	.endif
+
+	mov edx, (Operand ptr[edx]).address
+	mov (ImmOperand ptr[edx]).value, eax
+	ret
+
+convert_digit_to_operand ENDP
 
 insert_code_label PROC USES ebx,
 	pString: DWORD,
@@ -481,8 +508,24 @@ tokenize_instruction PROC USES eax ecx edx esi edi,
 			.if nOperands == 2
 				;ERROR
 			.else
+				.if nOperands == 0
+					push edx
+					lea edx, operands[0]
+					invoke convert_symbol_to_operand, esi, edx, initial_address
+					pop edx
+				.elseif nOperands == 1
+					push edx
+					lea edx, operands[sizeof Operand]
+					invoke convert_symbol_to_operand, esi, edx, initial_address
+					pop edx
+				.endif
+				
+				.if eax != 0
+					; ERRORs
+				.else
+					
+				.endif
 				inc nOperands
-
 			.endif
 
 			.if char == 13 || char == 10
@@ -492,6 +535,22 @@ tokenize_instruction PROC USES eax ecx edx esi edi,
 			.endif
 
 		deal_with_digit:
+			.if nOperands == 2
+				;ERROR
+			.else
+				.if nOperands == 0
+					push edx
+					lea edx, operands[0]
+					invoke convert_digit_to_operand, esi, tmp_str_len, edx
+					pop edx
+				.else
+					push edx
+					lea edx, operands[sizeof Operand]
+					invoke convert_digit_to_operand, esi, tmp_str_len, edx
+					pop edx
+				.endif
+				inc nOperands
+			.endif
 			.if char == 13 || char == 10
 				jmp form_instruction
 			.else
@@ -506,8 +565,9 @@ tokenize_instruction PROC USES eax ecx edx esi edi,
 			.endif
 
 		form_instruction:
+			mov nOperands, 0
 			.if char == 0
-				ret
+				jmp break_loop
 			.else
 				jmp clear_tmp_str
 			.endif
@@ -516,6 +576,10 @@ tokenize_instruction PROC USES eax ecx edx esi edi,
 		pop esi
 		inc ecx
 		inc esi
+		.continue
+
+		break_loop:
+		pop esi
 	.endw
 	ret
 
