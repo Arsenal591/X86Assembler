@@ -67,6 +67,33 @@ process_code_label PROC USES ebx edx esi,
 
 process_code_label ENDP
 
+; return value in EAX
+process_data_label PROC,
+	pString: DWORD,
+	pOperand: DWORD,
+
+	lea edx, data_symbol_list
+	invoke find_symbol, edx, pString
+	.if ebx == 0
+		mov eax, -1
+		ret
+	.elseif
+		mov esi, pOperand
+		mov (Operand ptr[esi]).op_type, global_type
+
+		mov al, (SymbolElem ptr[ebx]).op_size
+		mov (Operand ptr[esi]).op_size, al
+
+		mov esi, (Operand ptr[esi]).address
+		mov eax, (SymbolElem ptr[ebx]).address
+		mov (GlobalOperand ptr[esi]).value, eax
+
+		mov eax, 0
+		ret
+	.endif 
+
+process_data_label ENDP
+
 	code: DWORD,
 	max_length: DWORD
 	LOCAL char: BYTE, status: BYTE, tmp_str[256]: BYTE, tmp_str_len: DWORD
