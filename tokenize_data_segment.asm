@@ -14,6 +14,7 @@ var_type BYTE 16 DUP(0)
 byte_name BYTE "BYTE", 0
 word_name BYTE "WORD", 0
 dword_name BYTE "DWORD", 0
+code_seg BYTE ".code", 0
 
 .code 
 ;--------------------------------------------------
@@ -42,6 +43,26 @@ dword_type:
 convert_type_to_size ENDP
 
 ;--------------------------------------------------
+judge_code_segment PROC USES ebx ecx edi,
+	str_addr: PTR BYTE
+; Return : al = 1 is code, else is not
+;--------------------------------------------------
+	mov edi, str_addr
+	mov bh, [edi + 1]
+	mov bl, [edi + 2]
+	mov ch, [edi + 3]
+	mov dh, [edi + 4]
+	
+	.IF (bh == 99) && (bl == 111) && (ch == 100) && (cl == 101)
+		mov al, 1
+	.ELSE
+		mov al, 0
+	.ENDIF
+
+	ret
+judge_code_segment ENDP
+
+;--------------------------------------------------
 tokenize_data_segment PROC USES ebx ecx edx esi edi,
 	str_addr: PTR BYTE, ; the address of string
 	max_length: DWORD	; max read length
@@ -53,7 +74,8 @@ tokenize_data_segment PROC USES ebx ecx edx esi edi,
 ;--------------------------------------------------
 	local data_address: DWORD, part_count: BYTE, number_count: DWORD,
 		  flag_line_start: BYTE, pos_name: DWORD, pos_type: DWORD,
-		  type_size: BYTE, flag_quote: BYTE, size_count: DWORD
+		  type_size: BYTE, flag_quote: BYTE, size_count: DWORD,
+		  flag_dot: BYTE
 
 	mov data_address, 0
 	mov part_count, 0
@@ -64,6 +86,7 @@ tokenize_data_segment PROC USES ebx ecx edx esi edi,
 	mov type_size, 0
 	mov flag_quote, 0
 	mov size_count, 0
+	mov flag_dot, 0
 
 	mov ecx, max_length
 	mov esi, str_addr
@@ -73,6 +96,14 @@ L1:
 	.IF bl == 32 ; space
 		.IF flag_line_start
 			inc part_count
+		.ENDIF
+	.ELSEIF bl == 46 ; dot
+		.IF flag_quote == 0
+			INVOKE judge_code_segment, esi
+			.IF al == 1
+				add number_count, 4
+				jmp end_tokenize
+			.ENDIF
 		.ENDIF
 	.ELSEIF bl == 10 ; \n
 		.IF flag_line_start
@@ -159,6 +190,9 @@ next_L1:
 	dec ecx
 	cmp ecx,0
 	jne L1
+
+end_tokenize:
+	mov eax, number_count
 	ret
 tokenize_data_segment ENDP
 end
