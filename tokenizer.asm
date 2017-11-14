@@ -647,12 +647,16 @@ tokenize_instruction PROC USES eax ebx ecx edx esi edi,
 
 		break_loop:
 		pop esi
+		mov edx, pCharProcessed
+		mov eax, char_processed
+		mov DWORD PTR[edx], eax
+		mov edx, pFinalAddress
+		mov eax, initial_address
+		mov DWORD PTR[edx], eax
 		.break
 	.endw
-
 	ret
-
-
+	
 tokenize_instruction ENDP
 
 tokenize_asm PROC,
