@@ -34,3 +34,6 @@ parse_local_operand PROTO,
 tokenize_data_segment PROTO,
 	str_addr: PTR BYTE,
 	max_length: DWORD
+
+process_file PROC,
+	file_path: PTR BYTE
