@@ -564,6 +564,24 @@ tokenize_instruction PROC USES eax ecx edx esi edi,
 			.endif
 
 		deal_with_local:
+			.if nOperands == 2
+				; ERROR
+			.else
+				push edx
+				.if nOperands == 0
+					lea edx, operands[0]
+				.else
+					lea edx, operands[sizeof Operand]
+				.endif
+				mov (Operand ptr[edx]).op_type, local_type
+				mov (Operand ptr[edx]).op_size, 32
+				mov edx, (Operand ptr[edx]).address
+				invoke parse_local_operand, esi, edx
+				pop edx
+			.endif
+			.if eax != 0
+				; ERROR
+			.endif
 			.if char == 13 || char == 10
 				jmp form_instruction
 			.else
