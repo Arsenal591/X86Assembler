@@ -76,7 +76,7 @@ tokenize_data_segment PROC USES ebx ecx edx esi edi,
 		  flag_line_start: BYTE, pos_name: DWORD, pos_type: DWORD,
 		  type_size: BYTE, flag_quote: BYTE, size_count: DWORD,
 		  flag_dot: BYTE
-
+	
 	mov data_address, 0
 	mov part_count, 0
 	mov number_count, 0
@@ -112,7 +112,6 @@ L1:
 			mov pos_name, 0
 			mov pos_type, 0
 			mov part_count, 0
-			mov type_size, 0
 			; push_list
 			INVOKE push_list, 
 				ADDR data_symbol_list, 
@@ -120,10 +119,15 @@ L1:
 				data_address,
 				type_size
 			; calculate data_address
+			.IF size_count == 0
+				inc size_count
+			.ENDIF
 			mov eax, size_count
 			mul type_size
 			add data_address, eax
+			; set 0
 			mov size_count, 0
+			mov type_size, 0
 		.ENDIF
 	.ELSE
 		.IF flag_line_start == 0
