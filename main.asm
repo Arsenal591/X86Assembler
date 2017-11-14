@@ -18,7 +18,8 @@ local_result LocalOperand <>
 .code
 main proc
 	; INVOKE translate_asm_to_machine_code, ADDR mme, ADDR op1, ADDR op2, ADDR result
-	INVOKE parse_local_operand, ADDR test_string, ADDR local_result
+	; INVOKE parse_local_operand, ADDR test_string, ADDR local_result
+	
 	INVOKE ExitProcess,0
 main endp
 end main

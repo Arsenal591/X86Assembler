@@ -2,6 +2,7 @@
 .MODEL flat, stdcall
 
 include tokenizer.inc
+include parser_varible.inc
 
 .code
 
@@ -126,6 +127,7 @@ process_proc_label PROC USES ebx edx esi,
 
 process_proc_label ENDP
 
+tokenize_instruction PROC,
 	code: DWORD,
 	max_length: DWORD
 	LOCAL char: BYTE, status: BYTE, tmp_str[256]: BYTE, tmp_str_len: DWORD
