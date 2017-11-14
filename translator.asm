@@ -151,15 +151,16 @@ generate_string:
 	; Add Opcode
 	INVOKE convert_byte_to_string, opcode, esi
 	add esi, 2
-	INVOKE append_space_to_string, esi
-	inc esi
+	; INVOKE append_space_to_string, esi
+	; inc esi
+	add result_length, 2
 	; Add modR/M
 	.IF encoded == 0
 		INVOKE convert_byte_to_string, mode_RM, esi
 		add esi, 2
-		INVOKE append_space_to_string, esi
-		inc esi
-		add result_length, 3
+		; INVOKE append_space_to_string, esi
+		; inc esi
+		add result_length, 2
 	.ENDIF
 	; Add displacement
 	.IF flag_displace == 1
@@ -168,16 +169,16 @@ generate_string:
 			and ebx, 000000FFh
 			INVOKE convert_byte_to_string, bl, esi
 			add esi, 2
-			INVOKE append_space_to_string, esi
-			inc esi
-			add result_length, 3
+			; INVOKE append_space_to_string, esi
+			; inc esi
+			add result_length, 2
 			jmp imm_string
 		.ELSE
 			INVOKE convert_dword_to_string, displacement, esi
 			add esi, 8
-			INVOKE append_space_to_string, esi
-			inc esi
-			add result_length, 9
+			; INVOKE append_space_to_string, esi
+			; inc esi
+			add result_length, 8
 			jmp imm_string
 		.ENDIF
 	.ENDIF
@@ -186,9 +187,9 @@ imm_string:	; Add immediate
 	.IF flag_immediate == 1
 		INVOKE convert_dword_to_string, immediate, esi
 		add esi, 8
-		INVOKE append_space_to_string, esi
-		inc esi
-		add result_length, 9
+		; INVOKE append_space_to_string, esi
+		; inc esi
+		add result_length, 8
 	.ENDIF
 	
 	mov bl, 0

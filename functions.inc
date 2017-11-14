@@ -30,3 +30,7 @@ translate_asm_to_machine_code PROTO,
 parse_local_operand PROTO,
 	str_addr: PTR BYTE,
 	local_op: PTR LocalOperand
+
+tokenize_data_segment PROTO,
+	str_addr: PTR BYTE,
+	max_length: DWORD

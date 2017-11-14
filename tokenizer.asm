@@ -649,6 +649,7 @@ tokenize_instruction PROC USES eax ebx ecx edx esi edi,
 		pop esi
 		.break
 	.endw
+
 	ret
 
 

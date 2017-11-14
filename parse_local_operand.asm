@@ -182,7 +182,6 @@ parse_local_operand PROC USES eax ebx ecx edx esi,
 	local_op: PTR LocalOperand
 ;
 ; Parse string like "ebx+2*ecx+10" and change it into LocalOperand
-; 注意这三个部分的顺序可能会变，字符串中间会有空格
 ; Return: nothing
 ;--------------------------------------------------
 	LOCAL count: BYTE, pos0: DWORD, pos1: DWORD, pos2: DWORD,
@@ -294,40 +293,40 @@ next_L1:
 		.ELSE
 			ret
 		.ENDIF
+	.ENDIF
 
-		.IF count >= 2
-			INVOKE judge_string_type, 2, pos2, ADDR flag2
-			.IF flag2 == 1
-				.IF flag_base
-					ret
-				.ENDIF
-				mov flag_base, 2
-				mov esi, OFFSET part2
-				inc esi
-				INVOKE find_reg_type, esi
-				.IF al >= 8
-					ret
-				.ELSE
-					mov base, al
-				.ENDIF
-			.ELSEIF flag2 == 2
-				.IF flag_bias
-					ret
-				.ENDIF
-				mov flag_bias, 1
-				mov edx, OFFSET part2
-				mov ecx, pos2
-				call ParseInteger32
-				mov bias, eax
-			.ELSEIF flag2 == 3
-				.IF flag_mul
-					ret
-				.ENDIF
-				mov flag_mul, 1
-				INVOKE parse_mul_string, ADDR part2, pos2, ADDR index, ADDR scale
-			.ELSE
+	.IF count >= 2
+		INVOKE judge_string_type, 2, pos2, ADDR flag2
+		.IF flag2 == 1
+			.IF flag_base
 				ret
 			.ENDIF
+			mov flag_base, 2
+			mov esi, OFFSET part2
+			inc esi
+			INVOKE find_reg_type, esi
+			.IF al >= 8
+				ret
+			.ELSE
+				mov base, al
+			.ENDIF
+		.ELSEIF flag2 == 2
+			.IF flag_bias
+				ret
+			.ENDIF
+			mov flag_bias, 1
+			mov edx, OFFSET part2
+			mov ecx, pos2
+			call ParseInteger32
+			mov bias, eax
+		.ELSEIF flag2 == 3
+			.IF flag_mul
+				ret
+			.ENDIF
+			mov flag_mul, 1
+			INVOKE parse_mul_string, ADDR part2, pos2, ADDR index, ADDR scale
+		.ELSE
+			ret
 		.ENDIF
 	.ENDIF
 
