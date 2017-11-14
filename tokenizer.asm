@@ -22,6 +22,7 @@ WriteInt proto
 
 .data
 divide_str BYTE "--------------", 13, 10, 0
+now_address BYTE "Now the address is ", 0
 
 reg_string_mappings RegStringMappingElem <"EAX", full_reg SHL 4 + EAX_num>
 RegStringMappingElem <"EBX", full_reg SHL 4 + EBX_num>
@@ -283,7 +284,7 @@ insert_proc_label ENDP
 
 ; todo: error handling
 ; todo: return pCharProcessed & pFinalAddress
-tokenize_instruction PROC USES eax ecx edx esi edi,
+tokenize_instruction PROC USES eax ebx ecx edx esi edi,
 	code: DWORD,
 	max_length: DWORD,
 	initial_address: DWORD,
@@ -294,7 +295,8 @@ tokenize_instruction PROC USES eax ecx edx esi edi,
 		  instruct_str[256]: BYTE, \
 		  nOperands: BYTE, \
 		  operands[2]: Operand, real_operands[2]: LocalOperand, \
-		  char_processed: DWORD
+		  char_processed: DWORD, \
+		  encoded_machine_code[256]: BYTE
 		  
 	mov nOperands, 0
 	mov status, BEGIN_STATE
@@ -309,6 +311,8 @@ tokenize_instruction PROC USES eax ecx edx esi edi,
 	lea esi, tmp_str
 	invoke Str_clear, esi, 256
 	lea esi, instruct_str
+	invoke Str_clear, esi, 256
+	lea esi, encoded_machine_code
 	invoke Str_clear, esi, 256
 
 	mov ecx, 0
@@ -534,7 +538,7 @@ tokenize_instruction PROC USES eax ecx edx esi edi,
 				inc nOperands
 			.endif
 
-			.if char == 13 || char == 10
+			.if char == 13 || char == 10 || char == 0
 				jmp form_instruction
 			.else
 				jmp clear_tmp_str
@@ -557,7 +561,7 @@ tokenize_instruction PROC USES eax ecx edx esi edi,
 				.endif
 				inc nOperands
 			.endif
-			.if char == 13 || char == 10
+			.if char == 13 || char == 10 || char == 0
 				jmp form_instruction
 			.else
 				jmp clear_tmp_str
@@ -578,17 +582,56 @@ tokenize_instruction PROC USES eax ecx edx esi edi,
 				mov edx, (Operand ptr[edx]).address
 				invoke parse_local_operand, esi, edx
 				pop edx
+				inc nOperands
 			.endif
 			.if eax != 0
 				; ERROR
 			.endif
-			.if char == 13 || char == 10
+			.if char == 13 || char == 10 || char == 0
 				jmp form_instruction
 			.else
 				jmp clear_tmp_str
 			.endif
 
 		form_instruction:
+			lea ebx, operands[0]
+			lea edx, operands[sizeof Operand]
+			lea edi, encoded_machine_code
+
+			push esi
+			lea esi, instruct_str
+
+			.if nOperands == 0
+				invoke translate_asm_to_machine_code, esi, 0, 0, edi
+			.elseif nOperands == 1
+				invoke translate_asm_to_machine_code, esi, ebx, 0, edi
+			.elseif nOperands == 2
+				invoke translate_asm_to_machine_code, esi, ebx, edx, edi
+			.endif
+
+			pop esi
+
+			add initial_address, eax
+			mov eax, initial_address
+			mov edx, offset now_address
+			invoke WriteString
+			invoke WriteInt
+			mov al, 13
+			invoke WriteChar
+			mov al, 10
+			invoke WriteChar
+			mov edx, edi
+			invoke WriteString
+			mov al, 13
+			invoke WriteChar
+			mov al, 10
+			invoke WriteChar
+
+			lea edx, instruct_str
+			invoke Str_clear, edx, 256
+			lea edx, encoded_machine_code
+			invoke Str_clear, edx, 256
+
 			mov nOperands, 0
 			.if char == 0
 				jmp break_loop
