@@ -114,7 +114,7 @@ get_modeRM PROC USES ebx edx,
 		mov bias, eax
 		pop eax
 
-		.if bias >= 128 || bias < -128
+		.if bias >= 128 && bias < (1 SHL 32 - 128)
 			mov mode, 10b
 		.elseif bias != 0
 			mov mode, 01b
