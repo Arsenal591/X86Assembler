@@ -54,8 +54,10 @@ test_symbol6 BYTE "qrs", 0
 
 test_str BYTE "qddrs", 0
 
+test_data_seg BYTE "var12345 dword 123", 0ah, "var2 byte ", 022h, "test", 022h, 0ah, ".code"
 .code
 main proc
+
 	invoke push_list, offset data_symbol_list, offset test_symbol1, 40, 0
 	invoke push_list, offset data_symbol_list, offset test_symbol2, 50, 0
 
@@ -96,9 +98,6 @@ main proc
 	!
 	ret
 
-	; INVOKE translate_asm_to_machine_code, ADDR mme, ADDR op1, ADDR op2, ADDR result
-	; INVOKE parse_local_operand, ADDR test_string, ADDR local_result
-	
 	INVOKE ExitProcess,0
 main endp
 end main
