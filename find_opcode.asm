@@ -67,6 +67,7 @@ L3:
 					.WHILE bl < 32
 						shl bl, 1
 						.IF bl == dl
+							mov (Operand PTR [esi]).op_size, bl
 							jmp L5
 						.ENDIF
 					.ENDW
