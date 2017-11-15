@@ -912,18 +912,20 @@ L1:
 			mov pos_type, 0
 			mov part_count, 0
 			; push_list
+			mov dl, type_size
+			shl dl, 3
 			INVOKE push_list, 
 				ADDR data_symbol_list, 
 				ADDR var_name, 
 				data_address,
-				type_size
+				dl
 			; calculate data_address
 			.IF size_count == 0
 				inc size_count
 			.ENDIF
-			mov eax, size_count
+			mov edx, size_count
 			mul type_size
-			add data_address, eax
+			add data_address, edx
 			; set 0
 			mov size_count, 0
 			mov type_size, 0
