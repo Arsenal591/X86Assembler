@@ -21,6 +21,9 @@ get_modeRM PROTO,
 	source_addr: DWORD,
 	digit: BYTE
 
+get_SIB PROTO,
+	pOperand: DWORD
+
 translate_asm_to_machine_code PROTO,
 	mne_addr: PTR BYTE,	
 	op1_addr: PTR Operand,

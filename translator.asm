@@ -99,6 +99,7 @@ translate_asm_to_machine_code PROC USES ebx ecx edx edi esi,
 ;--------------------------------------------------
 	LOCAL digit: BYTE, encoded: BYTE, 
 		  mode_RM: BYTE, opcode: BYTE,
+		  SIB: BYTE, has_SIB: BYTE,
 		  flag_displace: BYTE, displacement: SDWORD, 
 		  flag_immediate: BYTE, immediate: SDWORD,
 		  digit_displace: BYTE, result_length: DWORD
@@ -108,6 +109,23 @@ translate_asm_to_machine_code PROC USES ebx ecx edx edi esi,
 	.IF encoded == 0
 		INVOKE get_modeRM, op1_addr, op2_addr, digit
 		mov mode_RM, al
+		.IF ah == 0
+			mov has_SIB, 0
+		.ELSEIF
+			mov has_SIB, 1
+			push edx
+			push eax
+			mov edx, op1_addr
+			mov al, (Operand ptr[edx]).op_type
+			.IF al == local_type
+				invoke get_SIB, edx
+			.ELSE
+				invoke get_SIB, op2_addr
+			.ENDIF
+			mov SIB, al
+			pop eax
+			pop edx
+		.ENDIF
 	.ENDIF
 	
 	mov flag_displace, 0
@@ -199,6 +217,17 @@ generate_string:
 		inc esi
 	.ENDIF
 
+SIB_string:
+	.IF has_SIB == 0
+		jmp displacement_string
+	.ELSE
+		INVOKE convert_byte_to_string, SIB, esi
+		add esi, 2
+		add result_length, 2
+		INVOKE append_space_to_string, esi
+		inc esi
+	.ENDIF
+
 displacement_string:
 	; Add displacement
 	.IF flag_displace == global_type
@@ -209,7 +238,16 @@ displacement_string:
 		inc esi
 		jmp imm_string
 	.ELSEIF flag_displace == local_type
-		.IF (displacement >= -128) && (displacement <= 127)
+		.IF displacement == 0
+			.IF mode_RM > 00111111b
+				invoke convert_byte_to_string, 0, esi
+				add esi, 2
+				add result_length, 2
+				INVOKE append_space_to_string, esi
+				inc esi
+				jmp imm_string
+			.ENDIF
+		.ELSEIF (displacement >= -128) && (displacement <= 127)
 			mov ebx, displacement
 			and ebx, 000000FFh
 			INVOKE convert_byte_to_string, bl, esi
