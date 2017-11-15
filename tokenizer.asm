@@ -904,7 +904,7 @@ L1:
 				jmp end_tokenize
 			.ENDIF
 		.ENDIF
-	.ELSEIF bl == 10 ; \n
+	.ELSEIF bl == 10 || bl == 13; \r\n
 		.IF flag_line_start
 			; set 0
 			mov flag_line_start, 0
