@@ -103,10 +103,11 @@ translate_asm_to_machine_code PROC USES ebx ecx edx edi esi,
 		  flag_displace: BYTE, displacement: SDWORD, 
 		  flag_immediate: BYTE, immediate: SDWORD,
 		  digit_displace: BYTE, result_length: DWORD
-
+	
+	mov has_SIB, 0
 	INVOKE find_opcode, mne_addr, op1_addr, op2_addr, ADDR digit, ADDR encoded
 	mov opcode, al
-	.IF encoded == 0
+	.IF encoded == 0 && op1_addr != 0
 		INVOKE get_modeRM, op1_addr, op2_addr, digit
 		mov mode_RM, al
 		.IF ah == 0
@@ -119,7 +120,7 @@ translate_asm_to_machine_code PROC USES ebx ecx edx edi esi,
 			mov al, (Operand ptr[edx]).op_type
 			.IF al == local_type
 				invoke get_SIB, edx
-			.ELSE
+			.ELSEIF op2_addr != 0
 				invoke get_SIB, op2_addr
 			.ENDIF
 			mov SIB, al
@@ -202,6 +203,9 @@ generate_string:
 	INVOKE append_space_to_string, esi
 	inc esi
 	; Add modR/M
+	.IF op1_addr == 0
+		jmp generate_end
+	.ENDIF
 	.IF encoded == 0
 		.IF (op1_addr != 0) && (op2_addr == 0)
 			mov edi, op1_addr
