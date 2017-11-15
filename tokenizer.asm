@@ -19,10 +19,13 @@ ParseInteger32 PROTO
 WriteString proto
 WriteChar proto
 WriteInt proto
+WriteHexB proto
 
 .data
+start_proc_str BYTE "PROC", 0
+end_proc_str BYTE "ENDP", 0
 divide_str BYTE "--------------", 13, 10, 0
-now_address BYTE "Now the address is ", 0
+now_address BYTE "Address ", 0
 
 reg_string_mappings RegStringMappingElem <"EAX", full_reg SHL 4 + EAX_num>
 RegStringMappingElem <"EBX", full_reg SHL 4 + EBX_num>
@@ -325,6 +328,7 @@ tokenize_instruction PROC USES eax ebx ecx edx esi edi,
 		push esi
 		lea esi, tmp_str
 
+		COMMENT &
 		; dumps debug info
 		push eax
 		push edx
@@ -357,6 +361,8 @@ tokenize_instruction PROC USES eax ebx ecx edx esi edi,
 		
 		pop edx
 		pop eax
+
+		&
 
 		; ends debug info
 		.if status == BEGIN_STATE
@@ -518,6 +524,9 @@ tokenize_instruction PROC USES eax ebx ecx edx esi edi,
 			.if nOperands == 2
 				;ERROR
 			.else
+			    ; if "ENDP" occurs, terminate the current proc
+				invoke Str_compare, esi, offset end_proc_str
+				je break_loop
 				.if nOperands == 0
 					push edx
 					lea edx, operands[0]
@@ -611,15 +620,22 @@ tokenize_instruction PROC USES eax ebx ecx edx esi edi,
 
 			pop esi
 
-			add initial_address, eax
-			mov eax, initial_address
 			mov edx, offset now_address
 			invoke WriteString
-			invoke WriteInt
-			mov al, 13
+
+			mov al, '0'
 			invoke WriteChar
-			mov al, 10
+			mov al, 'x'
 			invoke WriteChar
+			mov eax, initial_address
+			mov ebx, 4
+			invoke WriteHexB
+			
+			mov al, ':'
+			invoke WriteChar
+			mov al, ' '
+			invoke WriteChar
+
 			mov edx, edi
 			invoke WriteString
 			mov al, 13
@@ -627,6 +643,7 @@ tokenize_instruction PROC USES eax ebx ecx edx esi edi,
 			mov al, 10
 			invoke WriteChar
 
+			add initial_address, eax
 			lea edx, instruct_str
 			invoke Str_clear, edx, 256
 			lea edx, encoded_machine_code
@@ -659,11 +676,140 @@ tokenize_instruction PROC USES eax ebx ecx edx esi edi,
 	
 tokenize_instruction ENDP
 
+tokenize_code_segment PROC USES eax ebx ecx edx esi,
+	pCode: PTR BYTE,
+	max_length: DWORD
+	LOCAL first_symbol_name[256]: BYTE, second_symbol_name[256]: BYTE,
+	      status: DWORD, char: BYTE, ptr1: PTR BYTE, ptr2: PTR  BYTE,
+		  address: BYTE, nProcessed: DWORD
+
+	mov address, 0
+	mov status, BEGIN_STATE
+	lea esi, first_symbol_name
+	invoke Str_clear, esi, 256
+	mov ptr1, esi
+	lea esi, second_symbol_name
+	invoke Str_clear, esi, 256
+	mov ptr2, esi
+
+	mov ecx, 0
+	mov esi, pCode
+	.while ecx <= max_length
+		mov al, BYTE PTR[esi]
+		mov char, al
+
+		.if status == BEGIN_STATE
+			.if (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')
+				mov status, FIRST_SYMBOL_STATE
+				mov edx, ptr1
+				mov al, char
+				mov BYTE PTR[edx], al
+				inc ptr1
+			.endif
+		.elseif status == FIRST_SYMBOL_STATE
+			.if (char >= 'a' && char <= 'z')  || (char >= 'A' && char <= 'Z') \
+			    || (char >= '0' && char <= '9')
+				mov edx, ptr1
+				mov al, char
+				mov BYTE PTR[edx], al
+				inc ptr1
+			.elseif char == ' '
+				mov status, AFTER_FIRST_SYMBOL_STATE
+			.elseif char == 13 || char == 10 || char == 0
+				mov status, BEGIN_STATE
+				jmp clear_str
+			.endif
+		.elseif status == AFTER_FIRST_SYMBOL_STATE
+			.if (char >= 'a' && char <= 'z')  || (char >= 'A' && char <= 'Z')
+				mov status, SECOND_SYMBOL_STATE
+				mov edx, ptr2
+				mov al, char
+				mov BYTE PTR[edx], al
+				inc ptr2
+			.elseif char == 13 || char == 10 || char == 0
+				mov status, BEGIN_STATE
+				jmp clear_str
+			.endif
+		.elseif status == SECOND_SYMBOL_STATE
+			.if (char >= 'a' && char <= 'z')  || (char >= 'A' && char <= 'Z') \
+			    || (char >= '0' && char <= '9')
+				mov edx, ptr2
+				mov al, char
+				mov BYTE PTR[edx], al
+				inc ptr2
+			.elseif char == ' '
+				mov status, AFTER_SECOND_SYMBOL_STATE
+			.elseif char == 13 || char == 10 || char == 0
+				mov status, BEGIN_STATE
+				jmp check_second_str
+			.endif
+		.elseif status == AFTER_SECOND_SYMBOL_STATE
+			.if char == 13 || char == 10 || char == 0
+				mov status, BEGIN_STATE
+				jmp check_second_str
+			.elseif char == ' '
+				; nothing
+			.else
+				mov status, USELESS_STATE
+			.endif
+		.elseif status == USELESS_STATE
+			.if char == 13 || char == 10 || char == 0
+				mov status, BEGIN_STATE
+				jmp clear_str
+			.endif
+		.endif
+
+		inc ecx
+		inc esi
+		.continue
+
+		check_second_str:
+			lea edx, second_symbol_name
+			invoke Str_compare, offset start_proc_str, edx
+			jne clear_str
+			lea edx, first_symbol_name
+			invoke push_list, offset proc_symbol_list, edx, address, 0
+			inc esi
+			lea ebx, nProcessed
+			lea edx, address
+			invoke tokenize_instruction, esi, max_length, address, ebx, edx
+			add ecx, nProcessed
+			add esi, nProcessed
+			jmp clear_str
+
+		clear_str:
+			lea edx, first_symbol_name
+			invoke Str_clear, edx, 256
+			mov ptr1, edx
+			lea edx, second_symbol_name
+			invoke Str_clear, edx, 256
+			mov ptr2, edx
+
+			.if char == 0
+				jmp end_loop
+			.else
+				jmp final
+			.endif
+			
+
+		end_loop:
+			.break
+
+		final:
+			inc ecx
+			inc esi
+	.endw
+
+	ret
+
+tokenize_code_segment ENDP
+
 tokenize_asm PROC,
 	code: DWORD,
 	max_length: DWORD
 
 
+	ret
 tokenize_asm ENDP
 
 END
