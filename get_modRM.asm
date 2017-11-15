@@ -54,13 +54,16 @@ get_encoding_of_operand ENDP
 
 ; given two operands(sometimes 1) and a /digit value, get the modeR/M byte of it
 ; return value is stored in al
+; if SIB needed is stored in ah
 get_modeRM PROC USES ebx edx,
 	target_addr: DWORD,
 	source_addr: DWORD,
 	digit: BYTE
 	LOCAL mode: BYTE, RM: BYTE, reg: BYTE, col_addr: DWORD, row_addr: DWORD,\
-		  type1: BYTE, type2: BYTE, bias: DWORD, base: BYTE
+		  type1: BYTE, type2: BYTE, bias: DWORD, base: BYTE, scale: BYTE,
+		  reg_num: BYTE
 
+	mov eax, 0
 	mov ebx, target_addr
 	mov edx, source_addr
 	; find column operand and row operand
@@ -134,8 +137,33 @@ get_modeRM PROC USES ebx edx,
 	.endif
 
 	;get RM of col_addr
-	invoke get_encoding_of_operand, ebx
-	mov RM, al
+	.if type1 == reg_type || type1 == global_type
+		invoke get_encoding_of_operand, ebx
+		mov RM, al
+	.else
+		push edx
+		mov edx, (Operand ptr[ebx]).address
+
+		push eax
+		mov al, (LocalOperand ptr[edx]).scale
+		mov scale, al
+		mov al, (LocalOperand ptr[edx]).base
+		mov reg_num, al
+		pop eax 
+
+		.if scale == 0
+			invoke get_encoding_of_operand, ebx
+			mov RM, al
+			.if reg_num == ESP_num
+				mov ah, 1
+			.endif
+		.else
+			mov RM, 100b
+			mov ah, 1
+		.endif
+
+		pop edx
+	.endif
 
 	;get reg of row_addr
 	.if edx == 0
