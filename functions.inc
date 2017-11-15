@@ -35,5 +35,9 @@ tokenize_data_segment PROTO,
 	str_addr: PTR BYTE,
 	max_length: DWORD
 
-process_file PROC,
+tokenize_code_segment PROTO,
+	pCode: PTR BYTE,
+	max_length: DWORD
+
+process_file PROTO,
 	file_path: PTR BYTE
