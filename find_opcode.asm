@@ -62,6 +62,15 @@ L3:
 			mov bl, (Operand PTR [esi]).op_size
 			mov dl, (TableElem PTR [edi]).source_size
 			.IF bl != dl
+				 mov bh, (Operand PTR [esi]).op_type
+				.IF bh == imm_type
+					.WHILE bl < 32
+						shl bl, 1
+						.IF bl == dl
+							jmp L5
+						.ENDIF
+					.ENDW
+				.ENDIF
 				jmp L4
 			.ENDIF
 		.ELSE
