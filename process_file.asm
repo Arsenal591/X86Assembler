@@ -18,9 +18,9 @@ judge_data_segment PROC USES ebx ecx edi,
 	mov bh, [edi + 1]
 	mov bl, [edi + 2]
 	mov ch, [edi + 3]
-	mov dh, [edi + 4]
+	mov cl, [edi + 4]
 	
-	.IF (bh == 100) && (bl == 97) && (ch == 116) && (cl == 97)
+	.IF (bh == 'd') && (bl == 'a') && (ch == 't') && (cl == 'a')
 		mov al, 1
 	.ELSE
 		mov al, 0
@@ -36,7 +36,7 @@ process_file PROC USES eax ecx edx esi,
 ; generate 
 ; Return: nothing
 ;--------------------------------------------------
-	LOCAL bytesRead: DWORD
+	LOCAL bytesRead: DWORD, test_str: PTR BYTE
 
 	mov bytesRead, 0
 	mov edx, file_path
@@ -53,9 +53,11 @@ process_file PROC USES eax ecx edx esi,
 	ret
 success_read:
 	mov esi, OFFSET buffer
+	mov bytesRead, eax
 	; find .data and add esi
 	mov ecx, bytesRead
 loop_read:
+	mov test_str, esi
 	mov bl, [esi]
 	.IF bl == 46 ; dot
 		INVOKE judge_data_segment, esi

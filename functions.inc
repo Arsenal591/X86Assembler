@@ -44,3 +44,43 @@ tokenize_code_segment PROTO,
 
 process_file PROTO,
 	file_path: PTR BYTE
+
+process_code_label PROTO,
+	pString: DWORD,
+	pOperand: DWORD,
+	current_address: DWORD
+
+process_data_label PROTO,
+	pString: DWORD,
+	pOperand: DWORD,
+
+process_proc_label PROTO,
+	pString: DWORD,
+	pOperand: DWORD,
+	current_address: DWORD
+
+tokenize_instruction PROTO,
+	code: DWORD,
+	max_length: DWORD,
+	initial_address: DWORD,
+	pCharProcessed: DWORD,
+	pFinalAddress: DWORD
+
+convert_symbol_to_operand PROTO,
+	pString: DWORD,
+	pOperand: DWORD,
+	current_address: DWORD
+
+tokenize_code_segment PROTO,
+	pCode: PTR BYTE,
+	max_length: DWORD
+
+push_list PROTO,
+	list: DWORD,
+	symbol: DWORD,
+	address: DWORD,
+	op_size: BYTE
+
+find_symbol PROTO,
+	list: DWORD,
+	symbol: DWORD

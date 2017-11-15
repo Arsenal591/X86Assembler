@@ -4,10 +4,7 @@
 include operand.inc
 include functions.inc
 
-public get_modeRM
-
 .code
-
 get_encoding_of_register PROC,
 	reg: BYTE
 	LOCAL tmp: BYTE

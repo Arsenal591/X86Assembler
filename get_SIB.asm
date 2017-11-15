@@ -2,12 +2,9 @@
 .MODEL flat, stdcall
 
 include operand.inc
+include functions.inc
 
 .code
-
-get_encoding_of_register PROTO,
-	reg: BYTE
-
 ; get SIB
 ; return value is stored in AL
 get_SIB PROC USES edx,

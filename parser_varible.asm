@@ -2,18 +2,9 @@
 .MODEL flat, stdcall
 
 include parser_varible.inc
+include functions.inc
 include Irvine32.inc
-
-Str_copy proto,
-	source: ptr byte,
-	target: ptr byte
-
-Str_length proto,
-	pString: ptr byte
-
-Str_compare proto,
-	string1: ptr byte,
-	string2: ptr byte
+includelib Irvine32.lib
 
 .data
 proc_symbols SymbolElem 256 DUP(<256 DUP(0), 0, 0 >)

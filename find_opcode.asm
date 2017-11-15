@@ -110,4 +110,4 @@ L5: ; Find in table
 	mov BYTE PTR [esi], bl
 	ret
 find_opcode ENDP
-end find_opcode
+end
