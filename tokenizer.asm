@@ -50,7 +50,7 @@ RegStringMappingElem <"DL", low_quar_reg SHL 4 + EDX_num>
 RegStringMappingElem <"AH", high_quar_reg SHL 4 + EAX_num>
 RegStringMappingElem <"BH", high_quar_reg SHL 4 + EBX_num>
 RegStringMappingElem <"CH", high_quar_reg SHL 4 + ECX_num>
-RegStringMappingElem <"DD", high_quar_reg SHL 4 + EDX_num>
+RegStringMappingElem <"DH", high_quar_reg SHL 4 + EDX_num>
 
 .code
 
@@ -101,14 +101,22 @@ process_code_label PROC USES ebx edx esi,
 
 		mov eax, (SymbolElem ptr[ebx]).address
 		sub eax, current_address
-		.if eax <= 127 || eax >= (1 SHL 32 - 128)
+		.if eax <= 129 || eax >= (1 SHL 32 - 126)
 			mov (Operand ptr[esi]).op_size, 8
+			sub eax, 2
+			mov esi, (Operand ptr[esi]).address
+			mov (OffsetOperand ptr[esi]).bias, eax
+		.elseif eax <= 32770 || eax >= (1 SHL 32 - 32765)
+			mov (Operand ptr[esi]).op_size, 16
+			sub eax, 3
+			mov esi, (Operand ptr[esi]).address
+			mov (OffsetOperand ptr[esi]).bias, eax
 		.else
 			mov (Operand ptr[esi]).op_size, 32
+			sub eax, 5
+			mov esi, (Operand ptr[esi]).address
+			mov (OffsetOperand ptr[esi]).bias, eax
 		.endif
-
-		mov esi, (Operand ptr[esi]).address
-		mov (OffsetOperand ptr[esi]).bias, eax
 
 		mov eax, 0
 	.endif
@@ -160,14 +168,22 @@ process_proc_label PROC USES ebx edx esi,
 
 		mov eax, (SymbolElem ptr[ebx]).address
 		sub eax, current_address
-		.if eax <= 127 || eax >= (1 SHL 32 - 128)
+		.if eax <= 129 || eax >= (1 SHL 32 - 126)
 			mov (Operand ptr[esi]).op_size, 8
+			sub eax, 2
+			mov esi, (Operand ptr[esi]).address
+			mov (OffsetOperand ptr[esi]).bias, eax
+		.elseif eax <= 32770 || eax >= (1 SHL 32 - 32765)
+			mov (Operand ptr[esi]).op_size, 16
+			sub eax, 3
+			mov esi, (Operand ptr[esi]).address
+			mov (OffsetOperand ptr[esi]).bias, eax
 		.else
 			mov (Operand ptr[esi]).op_size, 32
+			sub eax, 5
+			mov esi, (Operand ptr[esi]).address
+			mov (OffsetOperand ptr[esi]).bias, eax
 		.endif
-
-		mov esi, (Operand ptr[esi]).address
-		mov (OffsetOperand ptr[esi]).bias, eax
 
 		mov eax, 0
 	.endif
@@ -620,6 +636,7 @@ tokenize_instruction PROC USES eax ebx ecx edx esi edi,
 
 			pop esi
 
+			push eax
 			mov edx, offset now_address
 			invoke WriteString
 
@@ -642,6 +659,8 @@ tokenize_instruction PROC USES eax ebx ecx edx esi edi,
 			invoke WriteChar
 			mov al, 10
 			invoke WriteChar
+			
+			pop eax
 
 			add initial_address, eax
 			lea edx, instruct_str
