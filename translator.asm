@@ -176,23 +176,37 @@ translate_asm_to_machine_code PROC USES ebx ecx edx edi esi,
 
 generate_string:
 	mov esi, result_addr
-	mov bl, opcode
 	mov result_length, 0
 	; Add Opcode
 	INVOKE convert_byte_to_string, opcode, esi
 	add esi, 2
 	add result_length, 2
+	INVOKE append_space_to_string, esi
+	inc esi
 	; Add modR/M
 	.IF encoded == 0
+		.IF (op1_addr != 0) && (op2_addr == 0)
+			mov edi, op1_addr
+			mov bl, (Operand PTR [edi]).op_type
+			.IF (bl == offset_type) || (bl == imm_type)
+				jmp displacement_string
+			.ENDIF
+		.ENDIF
 		INVOKE convert_byte_to_string, mode_RM, esi
 		add esi, 2
 		add result_length, 2
+		INVOKE append_space_to_string, esi
+		inc esi
 	.ENDIF
+
+displacement_string:
 	; Add displacement
 	.IF flag_displace == global_type
 		INVOKE convert_dword_to_string, displacement, esi
 		add esi, 8
 		add result_length, 8
+		INVOKE append_space_to_string, esi
+		inc esi
 		jmp imm_string
 	.ELSEIF flag_displace == local_type
 		.IF (displacement >= -128) && (displacement <= 127)
@@ -201,11 +215,15 @@ generate_string:
 			INVOKE convert_byte_to_string, bl, esi
 			add esi, 2
 			add result_length, 2
+			INVOKE append_space_to_string, esi
+			inc esi
 			jmp imm_string
 		.ELSE
 			INVOKE convert_dword_to_string, displacement, esi
 			add esi, 8
 			add result_length, 8
+			INVOKE append_space_to_string, esi
+			inc esi
 			jmp imm_string
 		.ENDIF
 	.ELSEIF flag_displace == offset_type
@@ -215,6 +233,8 @@ generate_string:
 			INVOKE convert_byte_to_string, bl, esi
 			add esi, 2
 			add result_length, 2
+			INVOKE append_space_to_string, esi
+			inc esi
 			jmp imm_string
 		.ELSEIF digit_displace == 16
 			mov ebx, displacement
@@ -222,11 +242,15 @@ generate_string:
 			INVOKE convert_word_to_string, bx, esi
 			add esi, 4
 			add result_length, 4
+			INVOKE append_space_to_string, esi
+			inc esi
 			jmp imm_string
 		.ELSEIF digit_displace == 32
 			INVOKE convert_dword_to_string, displacement, esi
 			add esi, 8
 			add result_length, 8
+			INVOKE append_space_to_string, esi
+			inc esi
 			jmp imm_string
 		.ELSE
 			jmp imm_string
@@ -243,6 +267,8 @@ imm_string:	; Add immediate
 			INVOKE convert_byte_to_string, bl, esi
 			add esi, 2
 			add result_length, 2
+			INVOKE append_space_to_string, esi
+			inc esi
 			jmp generate_end
 		.ELSEIF flag_immediate == 16
 			mov ebx, immediate
@@ -250,16 +276,21 @@ imm_string:	; Add immediate
 			INVOKE convert_word_to_string, bx, esi
 			add esi, 4
 			add result_length, 4
+			INVOKE append_space_to_string, esi
+			inc esi
 			jmp generate_end
 		.ELSEIF flag_immediate == 32
 			INVOKE convert_dword_to_string, immediate, esi
 			add esi, 8
 			add result_length, 8
+			INVOKE append_space_to_string, esi
+			inc esi
 			jmp generate_end
 		.ELSE
 			jmp generate_end
 		.ENDIF
 	.ENDIF
+
 generate_end:	
 	mov bl, 0
 	mov [esi], bl
