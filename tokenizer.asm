@@ -189,6 +189,8 @@ convert_symbol_to_operand PROC USES ecx edx esi,
 	pOperand: DWORD,
 	current_address: DWORD
 
+	invoke Str_ucase, pString
+
 	; check if it is register
 	mov ecx, 0
 	mov edx, offset reg_string_mappings
