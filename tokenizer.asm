@@ -184,19 +184,23 @@ process_proc_label PROC USES ebx edx esi,
 
 process_proc_label ENDP
 
-convert_symbol_to_operand PROC USES ecx edx esi,
+convert_symbol_to_operand PROC USES ecx edx esi edi,
 	pString: DWORD,
 	pOperand: DWORD,
 	current_address: DWORD
+	LOCAL ucase_str[256]: BYTE
 
-	invoke Str_ucase, pString
+	lea edi, ucase_str
+	invoke Str_clear, edi, 256
+	invoke Str_copy, pString, edi
+	invoke Str_ucase, edi
 
 	; check if it is register
 	mov ecx, 0
 	mov edx, offset reg_string_mappings
 	.while ecx < 24
 		lea esi, (RegStringMappingElem ptr[edx]).str1
-		invoke Str_compare, pString, esi
+		invoke Str_compare, edi, esi
 		je L1
 		inc ecx
 		add edx, sizeof RegStringMappingElem
