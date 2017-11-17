@@ -43,6 +43,16 @@ L3:
 			mov bl, (Operand PTR [esi]).op_size
 			mov dl, (TableElem PTR [edi]).target_size
 			.IF bl != dl
+				mov bh, (Operand PTR [esi]).op_type
+				.IF bh == imm_type || bh == offset_type
+					.WHILE bl < 32
+						shl bl, 1
+						.IF bl == dl
+							mov (Operand PTR [esi]).op_size, bl
+							jmp L5
+						.ENDIF
+					.ENDW
+				.ENDIF
 				jmp L4
 			.ENDIF
 		.ELSE
@@ -63,7 +73,7 @@ L3:
 			mov dl, (TableElem PTR [edi]).source_size
 			.IF bl != dl
 				 mov bh, (Operand PTR [esi]).op_type
-				.IF bh == imm_type
+				.IF bh == imm_type || bh == offset_type
 					.WHILE bl < 32
 						shl bl, 1
 						.IF bl == dl
@@ -86,7 +96,7 @@ L3:
 	jmp L5
 L4:
 	add edi, TYPE TableElem
-	loop L3
+	jmp L3
 	; Not find in table
 	mov eax, 0
 	ret
