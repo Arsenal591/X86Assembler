@@ -44,11 +44,13 @@ L3:
 			mov dl, (TableElem PTR [edi]).target_size
 			.IF bl != dl
 				mov bh, (Operand PTR [esi]).op_type
-				.IF bh == imm_type || bh == offset_type
+				.IF bh == offset_type
 					.WHILE bl < 32
 						shl bl, 1
 						.IF bl == dl
 							mov (Operand PTR [esi]).op_size, bl
+							mov esi, (Operand PTR [esi]).address
+							sub (OffsetOperand PTR[esi]).bias, 2
 							jmp L5
 						.ENDIF
 					.ENDW
@@ -73,7 +75,7 @@ L3:
 			mov dl, (TableElem PTR [edi]).source_size
 			.IF bl != dl
 				 mov bh, (Operand PTR [esi]).op_type
-				.IF bh == imm_type || bh == offset_type
+				.IF bh == imm_type
 					.WHILE bl < 32
 						shl bl, 1
 						.IF bl == dl
