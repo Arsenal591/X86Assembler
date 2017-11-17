@@ -925,9 +925,9 @@ L1:
 			.IF size_count == 0
 				inc size_count
 			.ENDIF
-			mov edx, size_count
+			mov eax, size_count
 			mul type_size
-			add data_address, edx
+			add data_address, eax
 			; set 0
 			mov size_count, 0
 			mov type_size, 0
